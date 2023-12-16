@@ -70,3 +70,5 @@ public class OnCallAssigner {
         queue.add(member);
     }
 }
+
+//순번상 특정 근무자가 연속 2일 근무하게 되는 상황에는, 다음 근무자와 순서를 바꿔 편성한다.
