@@ -18,8 +18,6 @@ public class InputUtil {
         }
     }
 
-    // " ".isBlank() -> true
-    // " ".isEmpty() -> false
     public static String validateInputNotEmpty(String input) {
         if (input == null || input.isBlank()) {
             throw new InvalidInputException(ErrorMessage.INPUT_NOT_EMPTY);

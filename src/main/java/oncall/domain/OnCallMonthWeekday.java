@@ -1,6 +1,5 @@
 package oncall.domain;
 
-import java.util.List;
 import oncall.constant.WeekdayConstant;
 import oncall.exception.ErrorMessage;
 import oncall.exception.InvalidInputException;

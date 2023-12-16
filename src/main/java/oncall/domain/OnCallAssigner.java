@@ -1,8 +1,6 @@
 package oncall.domain;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import oncall.constant.MonthDays;
 import oncall.constant.WeekdayConstant;
@@ -12,13 +10,14 @@ public class OnCallAssigner {
     private int month;
     private int days;
     private String startWeekday;
-    private Deque<String> weekdayQueue;
-    private Deque<String> holidayQueue;
+    private final List<String> weekdayOnCall;
+    private final List<String> holidayOnCall;
     private final List<OnCallSchedule> onCallSchedules = new ArrayList<>();
 
     public OnCallAssigner(OnCallMonthWeekday onCallMonthWeekday, OnCallRequest onCallRequest) {
         initMonthDays(onCallMonthWeekday);
-        initQueues(onCallRequest);
+        this.weekdayOnCall = new ArrayList<>(onCallRequest.getWeekdayOnCall());
+        this.holidayOnCall = new ArrayList<>(onCallRequest.getHolidayOnCall());
         assignMembers();
     }
 
@@ -32,43 +31,32 @@ public class OnCallAssigner {
         this.startWeekday = onCallMonthWeekday.weekday();
     }
 
-    private void initQueues(OnCallRequest onCallRequest) {
-        weekdayQueue = new ArrayDeque<>(onCallRequest.getWeekdayOnCall());
-        holidayQueue = new ArrayDeque<>(onCallRequest.getHolidayOnCall());
-    }
-
     private void assignMembers() {
         int startWeekdayIndex = WeekdayConstant.WEEKDAYS.indexOf(startWeekday);
+        int weekdayIndex = 0;
+        int holidayIndex = 0;
 
-        for (int i = 1; i <= days; i++) {
-            if (startWeekdayIndex == 7) {
-                startWeekdayIndex = 0;
+        for (int day = 1; day <= days; day++) {
+            String weekday = WeekdayConstant.WEEKDAYS.get(startWeekdayIndex);
+
+            boolean isWeekend = WeekdayConstant.isWeekend(weekday);
+            boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, day);
+            boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
+
+            if (isWeekend || isLegalHoliday) {
+                OnCallSchedule schedule = OnCallSchedule.of(month, day, weekday, isWeekdayHoliday,
+                        holidayOnCall.get(holidayIndex));
+                onCallSchedules.add(schedule);
+                holidayIndex = (holidayIndex + 1) % holidayOnCall.size();
+                startWeekdayIndex = (startWeekdayIndex + 1) % 7;
+                continue;
             }
 
-            String weekday = WeekdayConstant.WEEKDAYS.get(startWeekdayIndex);
-            assignMemberForDay(weekday, i);
-            startWeekdayIndex++;
+            OnCallSchedule schedule = OnCallSchedule.of(month, day, weekday, false, weekdayOnCall.get(weekdayIndex));
+            onCallSchedules.add(schedule);
+            weekdayIndex = (weekdayIndex + 1) % weekdayOnCall.size();
+
+            startWeekdayIndex = (startWeekdayIndex + 1) % 7;
         }
-    }
-
-    private void assignMemberForDay(String weekday, int day) {
-        boolean isWeekend = WeekdayConstant.isWeekend(weekday);
-        boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, day);
-        boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
-
-        if (isWeekend || isLegalHoliday) {
-            assignMemberAndAddSchedule(holidayQueue, isWeekdayHoliday, weekday, day);
-            return;
-        }
-        assignMemberAndAddSchedule(weekdayQueue, false, weekday, day);
-    }
-
-    private void assignMemberAndAddSchedule(Deque<String> queue, boolean isWeekdayHoliday, String weekday, int day) {
-        String member = queue.poll();
-        OnCallSchedule schedule = OnCallSchedule.of(month, day, weekday, isWeekdayHoliday, member);
-        onCallSchedules.add(schedule);
-        queue.add(member);
     }
 }
-
-//순번상 특정 근무자가 연속 2일 근무하게 되는 상황에는, 다음 근무자와 순서를 바꿔 편성한다.
