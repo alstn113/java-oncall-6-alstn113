@@ -11,6 +11,23 @@ public class OnCallRequest {
     private List<String> weekdayOnCall = new ArrayList<>();
     private List<String> holidayOnCall = new ArrayList<>();
 
+    public void setWeekdayOnCall(String weekdayOnCallString) {
+        List<String> members = InputUtil.parseToList(weekdayOnCallString, ",");
+        validateDuplicate(members);
+        validateNameLength(members);
+        validateMembersSize(members);
+        this.weekdayOnCall = members;
+    }
+
+    public void setHolidayOnCall(String holidayOnCallString) {
+        List<String> members = InputUtil.parseToList(holidayOnCallString, ",");
+        validateDuplicate(members);
+        validateNameLength(members);
+        validateMembersSize(members);
+        validateNotAssignedTwo(members);
+        this.holidayOnCall = members;
+    }
+
     private void validateDuplicate(List<String> members) {
         if (members.size() != members.stream().distinct().count()) {
             throw new InvalidInputException(ErrorMessage.MEMBER_DUPLICATE);
@@ -29,26 +46,17 @@ public class OnCallRequest {
         }
     }
 
+    private void validateMembersSize(List<String> members) {
+        if (members.size() < 5 || members.size() > 35) {
+            throw new InvalidInputException(ErrorMessage.INVALID_MEMBER_SIZE);
+        }
+    }
+
     public List<String> getWeekdayOnCall() {
         return weekdayOnCall;
     }
 
-    public void setWeekdayOnCall(String weekdayOnCallString) {
-        List<String> members = InputUtil.parseToList(weekdayOnCallString, ",");
-        validateDuplicate(members);
-        validateNameLength(members);
-        this.weekdayOnCall = members;
-    }
-
     public List<String> getHolidayOnCall() {
         return holidayOnCall;
-    }
-
-    public void setHolidayOnCall(String holidayOnCallString) {
-        List<String> members = InputUtil.parseToList(holidayOnCallString, ",");
-        validateDuplicate(members);
-        validateNameLength(members);
-        validateNotAssignedTwo(members);
-        this.holidayOnCall = members;
     }
 }
