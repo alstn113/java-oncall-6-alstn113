@@ -50,7 +50,7 @@ public class OnCallAssigner {
             String weekday = weekdays.get(startWeekdayIndex);
             boolean isWeekend = weekday.equals("토") || weekday.equals("일");
             boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, i);
-            boolean isWeekdayHoliday = isWeekend && isLegalHoliday;
+            boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
 
             if (isWeekend || isLegalHoliday) {
                 String member = holidayQueue.poll();

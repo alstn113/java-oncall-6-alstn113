@@ -5,6 +5,7 @@ import oncall.domain.OnCallAssigner;
 import oncall.domain.OnCallMonthWeekday;
 import oncall.dto.request.OnCallMonthWeekdayRequest;
 import oncall.dto.request.OnCallRequest;
+import oncall.dto.response.AssignedOnCallResponse;
 import oncall.view.InputView;
 import oncall.view.OutputView;
 import oncall.view.util.InputUtil;
@@ -22,7 +23,7 @@ public class OnCallController {
         OnCallMonthWeekday onCallMonthWeekday = readOnCallMonthWeekday();
         OnCallRequest onCallRequest = readWeekdayOnCall();
         OnCallAssigner onCallAssigner = new OnCallAssigner(onCallMonthWeekday, onCallRequest);
-        outputView.printOnCallSchedule();
+        outputView.printOnCallSchedule(AssignedOnCallResponse.from(onCallAssigner.getOnCallSchedules()));
     }
 
     private OnCallMonthWeekday readOnCallMonthWeekday() {
