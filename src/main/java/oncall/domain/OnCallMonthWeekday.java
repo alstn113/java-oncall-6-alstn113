@@ -5,13 +5,16 @@ import oncall.exception.ErrorMessage;
 import oncall.exception.InvalidInputException;
 
 public record OnCallMonthWeekday(int month, String weekday) {
+    private static final int JANUARY = 1;
+    private static final int DECEMBER = 12;
+
     public OnCallMonthWeekday {
         validateMonth(month);
         validateWeekday(weekday);
     }
 
     private void validateMonth(int month) {
-        if (month < 1 || month > 12) {
+        if (month < JANUARY || month > DECEMBER) {
             throw new InvalidInputException(ErrorMessage.INVALID_MONTH);
         }
     }
