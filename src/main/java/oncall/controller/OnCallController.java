@@ -1,6 +1,7 @@
 package oncall.controller;
 
 
+import oncall.domain.OnCallAssigner;
 import oncall.domain.OnCallMonthWeekday;
 import oncall.dto.request.OnCallMonthWeekdayRequest;
 import oncall.dto.request.OnCallRequest;
@@ -20,6 +21,8 @@ public class OnCallController {
     public void run() {
         OnCallMonthWeekday onCallMonthWeekday = readOnCallMonthWeekday();
         OnCallRequest onCallRequest = readWeekdayOnCall();
+        OnCallAssigner onCallAssigner = new OnCallAssigner(onCallMonthWeekday, onCallRequest);
+        outputView.printOnCallSchedule();
     }
 
     private OnCallMonthWeekday readOnCallMonthWeekday() {
