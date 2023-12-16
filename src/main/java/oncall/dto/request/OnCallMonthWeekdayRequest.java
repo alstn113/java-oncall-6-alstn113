@@ -23,3 +23,4 @@ public record OnCallMonthWeekdayRequest(String input) {
         return new OnCallMonthWeekday(month, weekday);
     }
 }
+

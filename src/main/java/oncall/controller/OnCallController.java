@@ -3,6 +3,7 @@ package oncall.controller;
 
 import oncall.domain.OnCallMonthWeekday;
 import oncall.dto.request.OnCallMonthWeekdayRequest;
+import oncall.dto.request.OnCallRequest;
 import oncall.view.InputView;
 import oncall.view.OutputView;
 import oncall.view.util.InputUtil;
@@ -18,13 +19,24 @@ public class OnCallController {
 
     public void run() {
         OnCallMonthWeekday onCallMonthWeekday = readOnCallMonthWeekday();
-        System.out.println(onCallMonthWeekday);
+        OnCallRequest onCallRequest = readWeekdayOnCall();
     }
 
     private OnCallMonthWeekday readOnCallMonthWeekday() {
         return InputUtil.retryOnException(() -> {
             OnCallMonthWeekdayRequest dto = inputView.readOnCallMonthWeekday();
             return dto.toOnCallMonthWeekday();
+        });
+    }
+
+    private OnCallRequest readWeekdayOnCall() {
+        return InputUtil.retryOnException(() -> {
+            OnCallRequest dto = new OnCallRequest();
+            String weekdayOnCall = inputView.readWeekdayOnCall();
+            dto.setWeekdayOnCall(weekdayOnCall);
+            String holidayOnCall = inputView.readHolidayOnCall();
+            dto.setHolidayOnCall(holidayOnCall);
+            return dto;
         });
     }
 }
