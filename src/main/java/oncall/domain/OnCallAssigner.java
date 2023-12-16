@@ -21,6 +21,10 @@ public class OnCallAssigner {
         assignMembers();
     }
 
+    public List<OnCallSchedule> getOnCallSchedules() {
+        return onCallSchedules;
+    }
+
     private void initMonthDays(OnCallMonthWeekday onCallMonthWeekday) {
         this.month = onCallMonthWeekday.month();
         this.days = 31;
@@ -35,10 +39,6 @@ public class OnCallAssigner {
         holidayQueue = new ArrayDeque<>(onCallRequest.getHolidayOnCall());
     }
 
-    public List<OnCallSchedule> getOnCallSchedules() {
-        return onCallSchedules;
-    }
-
     private void assignMembers() {
         int startWeekdayIndex = weekdays.indexOf(startWeekday);
 
@@ -48,27 +48,27 @@ public class OnCallAssigner {
             }
 
             String weekday = weekdays.get(startWeekdayIndex);
-            boolean isWeekend = weekday.equals("토") || weekday.equals("일");
-            boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, i);
-            boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
-
-            if (isWeekend || isLegalHoliday) {
-                String member = holidayQueue.poll();
-                OnCallSchedule schedule = OnCallSchedule.of(month, i, weekday, isWeekdayHoliday, member);
-                onCallSchedules.add(schedule);
-                holidayQueue.add(member);
-                startWeekdayIndex++;
-                continue;
-            }
-
-            String member = weekdayQueue.poll();
-            OnCallSchedule schedule = OnCallSchedule.of(month, i, weekday, false, member);
-            onCallSchedules.add(schedule);
-            weekdayQueue.add(member);
-
+            assignMemberForDay(weekday, i);
             startWeekdayIndex++;
         }
     }
 
+    private void assignMemberForDay(String weekday, int day) {
+        boolean isWeekend = weekday.equals("토") || weekday.equals("일");
+        boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, day);
+        boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
 
+        if (isWeekend || isLegalHoliday) {
+            assignMemberAndAddSchedule(holidayQueue, isWeekdayHoliday, weekday, day);
+            return;
+        }
+        assignMemberAndAddSchedule(weekdayQueue, false, weekday, day);
+    }
+
+    private void assignMemberAndAddSchedule(Deque<String> queue, boolean isWeekdayHoliday, String weekday, int day) {
+        String member = queue.poll();
+        OnCallSchedule schedule = OnCallSchedule.of(month, day, weekday, isWeekdayHoliday, member);
+        onCallSchedules.add(schedule);
+        queue.add(member);
+    }
 }
