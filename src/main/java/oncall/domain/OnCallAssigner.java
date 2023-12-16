@@ -19,6 +19,7 @@ public class OnCallAssigner {
         this.weekdayOnCall = new ArrayList<>(onCallRequest.getWeekdayOnCall());
         this.holidayOnCall = new ArrayList<>(onCallRequest.getHolidayOnCall());
         assignMembers();
+        reassignMembers();
     }
 
     public List<OnCallSchedule> getOnCallSchedules() {
@@ -57,6 +58,54 @@ public class OnCallAssigner {
             weekdayIndex = (weekdayIndex + 1) % weekdayOnCall.size();
 
             startWeekdayIndex = (startWeekdayIndex + 1) % 7;
+        }
+    }
+
+    private void reassignMembers() {
+        for (int i = 1; i < onCallSchedules.size(); i++) {
+            String previousMemberName = onCallSchedules.get(i - 1).name();
+            OnCallSchedule currentSchedule = onCallSchedules.get(i);
+
+            // 다를 경우 다음으로 넘어감
+            if (!previousMemberName.equals(currentSchedule.name())) {
+                continue;
+            }
+
+            boolean isWeekend = WeekdayConstant.isWeekend(currentSchedule.weekday());
+            boolean isLegalHoliday = LegalHoliday.isLegalHoliday(currentSchedule.month(), currentSchedule.day());
+            boolean isHolidayOrWeekend = isWeekend || isLegalHoliday;
+
+            if (isHolidayOrWeekend) {
+                int nextHolidayIndex = (holidayOnCall.indexOf(currentSchedule.name()) + 1) % holidayOnCall.size();
+                String nextName = holidayOnCall.get(nextHolidayIndex);
+
+                // onCallSchedules 중 i번째 인덱스 뒤의 값 중 다음 근무자와 같은 이름을 가진 근무자를 찾아서 이름을 스왑해줌
+                String tmp = currentSchedule.name();
+                currentSchedule.setName(nextName);
+                for (int j = i + 1; j < onCallSchedules.size(); j++) {
+                    OnCallSchedule nextSchedule = onCallSchedules.get(j);
+                    if (nextSchedule.name().equals(nextName)) {
+                        nextSchedule.setName(tmp);
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
+            // 평일에 대해서 swap
+            int nextWeekdayIndex = (weekdayOnCall.indexOf(currentSchedule.name()) + 1) % weekdayOnCall.size();
+            String nextName = weekdayOnCall.get(nextWeekdayIndex);
+            String tmp = currentSchedule.name();
+            // onCallSchedules 중 i번째 인덱스 뒤의 값 중 다음 근무자와 같은 이름을 가진 근무자를 찾아서 이름을 스왑해줌
+            currentSchedule.setName(nextName);
+            for (int j = i + 1; j < onCallSchedules.size(); j++) {
+                OnCallSchedule nextSchedule = onCallSchedules.get(j);
+                if (nextSchedule.name().equals(nextName)) {
+                    nextSchedule.setName(tmp);
+                    break;
+                }
+            }
         }
     }
 }
