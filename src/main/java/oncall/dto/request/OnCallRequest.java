@@ -8,11 +8,16 @@ import oncall.exception.InvalidInputException;
 import oncall.view.util.InputUtil;
 
 public class OnCallRequest {
+    private static final String COMMA = ",";
+    private static final int MAX_NAME_LENGTH = 5;
+    private static final int MIN_MEMBER_SIZE = 5;
+    private static final int MAX_MEMBER_SIZE = 35;
+
     private List<String> weekdayOnCall = new ArrayList<>();
     private List<String> holidayOnCall = new ArrayList<>();
 
     public void setWeekdayOnCall(String weekdayOnCallString) {
-        List<String> members = InputUtil.parseToList(weekdayOnCallString, ",");
+        List<String> members = InputUtil.parseToList(weekdayOnCallString, COMMA);
         validateDuplicate(members);
         validateNameLength(members);
         validateMembersSize(members);
@@ -20,7 +25,7 @@ public class OnCallRequest {
     }
 
     public void setHolidayOnCall(String holidayOnCallString) {
-        List<String> members = InputUtil.parseToList(holidayOnCallString, ",");
+        List<String> members = InputUtil.parseToList(holidayOnCallString, COMMA);
         validateDuplicate(members);
         validateNameLength(members);
         validateMembersSize(members);
@@ -35,7 +40,7 @@ public class OnCallRequest {
     }
 
     private void validateNameLength(List<String> members) {
-        if (members.stream().anyMatch(member -> member.length() > 5 || member.isBlank())) {
+        if (members.stream().anyMatch(member -> member.length() > MAX_NAME_LENGTH || member.isBlank())) {
             throw new InvalidInputException(ErrorMessage.INVALID_MEMBER_NAME_LENGTH);
         }
     }
@@ -47,7 +52,7 @@ public class OnCallRequest {
     }
 
     private void validateMembersSize(List<String> members) {
-        if (members.size() < 5 || members.size() > 35) {
+        if (members.size() < MIN_MEMBER_SIZE || members.size() > MAX_MEMBER_SIZE) {
             throw new InvalidInputException(ErrorMessage.INVALID_MEMBER_SIZE);
         }
     }
