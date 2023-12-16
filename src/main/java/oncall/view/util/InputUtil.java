@@ -18,11 +18,10 @@ public class InputUtil {
         }
     }
 
-    public static String validateInputNotEmpty(String input) {
+    public static void validateInputNotEmpty(String input) {
         if (input == null || input.isBlank()) {
             throw new InvalidInputException(ErrorMessage.INPUT_NOT_EMPTY);
         }
-        return input;
     }
 
 
@@ -47,25 +46,7 @@ public class InputUtil {
         }
     }
 
-    public static void retryOnException(Runnable runnable, boolean lineBreak) {
-        while (true) {
-            try {
-                runnable.run();
-                return;
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-                if (lineBreak) {
-                    System.out.println();
-                }
-            }
-        }
-    }
-
     public static <T> T retryOnException(Supplier<T> supplier) {
         return retryOnException(supplier, false);
-    }
-
-    public static void retryOnException(Runnable runnable) {
-        retryOnException(runnable, false);
     }
 }
