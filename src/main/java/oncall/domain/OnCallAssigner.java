@@ -4,6 +4,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import oncall.constant.MonthDays;
+import oncall.constant.WeekdayConstant;
 import oncall.dto.request.OnCallRequest;
 
 public class OnCallAssigner {
@@ -13,7 +15,6 @@ public class OnCallAssigner {
     private Deque<String> weekdayQueue;
     private Deque<String> holidayQueue;
     private final List<OnCallSchedule> onCallSchedules = new ArrayList<>();
-    private static final List<String> weekdays = List.of("월", "화", "수", "목", "금", "토", "일");
 
     public OnCallAssigner(OnCallMonthWeekday onCallMonthWeekday, OnCallRequest onCallRequest) {
         initMonthDays(onCallMonthWeekday);
@@ -27,10 +28,7 @@ public class OnCallAssigner {
 
     private void initMonthDays(OnCallMonthWeekday onCallMonthWeekday) {
         this.month = onCallMonthWeekday.month();
-        this.days = 31;
-        if (onCallMonthWeekday.month() == 2) {
-            this.days = 28;
-        }
+        this.days = MonthDays.DAYS.get(month - 1);
         this.startWeekday = onCallMonthWeekday.weekday();
     }
 
@@ -40,21 +38,21 @@ public class OnCallAssigner {
     }
 
     private void assignMembers() {
-        int startWeekdayIndex = weekdays.indexOf(startWeekday);
+        int startWeekdayIndex = WeekdayConstant.WEEKDAYS.indexOf(startWeekday);
 
         for (int i = 1; i <= days; i++) {
             if (startWeekdayIndex == 7) {
                 startWeekdayIndex = 0;
             }
 
-            String weekday = weekdays.get(startWeekdayIndex);
+            String weekday = WeekdayConstant.WEEKDAYS.get(startWeekdayIndex);
             assignMemberForDay(weekday, i);
             startWeekdayIndex++;
         }
     }
 
     private void assignMemberForDay(String weekday, int day) {
-        boolean isWeekend = weekday.equals("토") || weekday.equals("일");
+        boolean isWeekend = WeekdayConstant.isWeekend(weekday);
         boolean isLegalHoliday = LegalHoliday.isLegalHoliday(month, day);
         boolean isWeekdayHoliday = !isWeekend && isLegalHoliday;
 
